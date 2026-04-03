@@ -1,4 +1,4 @@
-# Zoomble V2 (CPS330 Assignment 2, Group 34)
+# Zoomble V3 (CPS330 Assignment 3, Group 34)
 Zoomble is a web game where users attempt to guess the subject of an image based on a very zoomed in selection of it. Users can also source their own images and create their own levels. Note that answers are singular words, so as to keep answers from getting too long and convoluted.
 
 ## Extended Content (Coming Soon???)

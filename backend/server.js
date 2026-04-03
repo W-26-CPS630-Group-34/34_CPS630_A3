@@ -2,8 +2,10 @@ const express   = require('express');
 const cors      = require('cors');
 const app       = express();
 const path      = require('path');
-const { default:mongoose } = require('mongoose');
-const Crop = require('./models/Crop');
+
+const mongoose = require('mongoose');
+const cropSchema = require('./models/Crop');
+const userSchema = require('./models/User');
 
 const PORT          = 8080;
 const DATABASE_HOST = 'localhost';
@@ -13,7 +15,7 @@ const DATABASE_PORT = 27017;
 app.use(cors());
 
 // database connect
-const dbURL = `mongodb://${DATABASE_HOST}:${DATABASE_PORT}/crops`;
+const dbURL = `mongodb://${DATABASE_HOST}:${DATABASE_PORT}/zoomble`;
 mongoose.connect(dbURL);
 
 const db = mongoose.connection;
@@ -24,6 +26,9 @@ db.on('error', function(e) {
 db.on('open', function(e) {
     console.log('database connected!');
 });
+
+const Crop = mongoose.model('Crop', cropSchema);
+const User = mongoose.model('User', userSchema);
 
 // change ALL OF THESE to absolute references
 crops = [
@@ -61,9 +66,51 @@ async function addInitCropsMongoDB() {
 }
 addInitCropsMongoDB();
 
+//!! Class 2: tiny authorization middleware for protected routes
+async function requireAuth(req, res, next) {
+    const authHeader = req.headers.authorization;
+
+    //we are expecting the auth header to be in the format "Bearer <token>", so we check for that and extract the token
+    //"Bearer " is part of the HTTP standard for authorization headers and indicates that the client is sending a token for authentication.
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Authorization header missing or invalid' });
+    }
+
+    const token = authHeader.substring(7); //just extract token part after "Bearer "
+    const user = await User.findOne({ token: token });
+    if (!user) {
+        return res.status(401).json({ error: 'Invalid auth token' });
+    }
+
+    next();
+}
+
 /*************************************************/
 /********* Defining (CRUD) API routes ************/
 /*************************************************/
+
+/************************/
+/******* SERVER *********/
+/******* AUTH ***********/
+/************************/
+//!! Class 1: simple login route that returns a static demo token
+app.post('/api/auth/login', express.json(), async (req, res) => {
+    const { username, password } = req.body || {};
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    const user = await User.findOne({ username: username, password: password });
+    if (user) {
+        return res.status(200).json({
+            message: 'Login successful',
+            token: user.token
+        });
+    }
+
+    return res.status(401).json({ error: 'Invalid username or password' });
+});
 
 /************************/
 /******* SERVER *********/
@@ -98,7 +145,7 @@ app.get('/api/crops/id/:id', async (req, res) => {
 /******* CREATE *********/
 /************************/
 //create new crop
-app.post('/api/crops', express.json(), async (req, res) => {
+app.post('/api/crops', requireAuth, express.json(), async (req, res) => {
     const newCrop = req.body;
 
     if (newCrop && newCrop.id && newCrop.src && newCrop.answer && newCrop.zoom) {
@@ -118,7 +165,7 @@ app.post('/api/crops', express.json(), async (req, res) => {
 /******* UPDATE *********/
 /************************/
 //update crop by unique id, i.e., ID
-app.patch('/api/crops/id/:id', express.json(), async (req, res) => {
+app.patch('/api/crops/id/:id', requireAuth, express.json(), async (req, res) => {
     console.log("PATCH request received");
 
     const cropId = req.params.id;
@@ -145,7 +192,7 @@ app.patch('/api/crops/id/:id', express.json(), async (req, res) => {
 /******* DELETE *********/
 /************************/
 //delete by unique id, i.e., ID (can only delete one)
-app.delete('/api/crops/id/:id', async (req, res) => {
+app.delete('/api/crops/id/:id', requireAuth, async (req, res) => {
     const cropId = req.params.id;
     const deleteStatus = await Crop.deleteOne({ id:cropId });
     if (deleteStatus === 0) {
