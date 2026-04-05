@@ -4,8 +4,8 @@ const app       = express();
 const path      = require('path');
 
 const mongoose = require('mongoose');
-const cropSchema = require('./models/Crop');
-const userSchema = require('./models/User');
+const Crop = require('./models/Crop');
+const User = require('./models/User');
 
 const PORT          = 8080;
 const DATABASE_HOST = 'localhost';
@@ -26,9 +26,6 @@ db.on('error', function(e) {
 db.on('open', function(e) {
     console.log('database connected!');
 });
-
-const Crop = mongoose.model('Crop', cropSchema);
-const User = mongoose.model('User', userSchema);
 
 // change ALL OF THESE to absolute references
 crops = [

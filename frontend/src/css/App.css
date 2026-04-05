@@ -57,7 +57,7 @@ a {
     font-size: 2em;
 }
 
-input[type=text], input[type=number]{
+input[type=text], input[type=number], input[type=password] {
     color: white;
     height: 25px;
     border: solid white 2px;

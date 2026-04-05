@@ -1,14 +1,15 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import "./App.css";
-import Home from "./pages/Home";
-import Game from "./pages/Game";
-import Admin from "./pages/Admin";
+import "./css/App.css";
+import Home from "./components/Home";
+import Game from "./components/Game";
+import Admin from "./components/Admin";
 
 function App() {
+  
   return (
     <Router>
       <div className="container">
-        <h1>Zoomble ver2.0</h1>
+        <h1>Zoomble ver3.0</h1>
 
         <nav>
           <Link to="/">Home</Link>
