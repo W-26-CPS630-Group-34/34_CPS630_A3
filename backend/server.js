@@ -1,7 +1,8 @@
 const express   = require('express');
 const cors      = require('cors');
-const app       = express();
-const path      = require('path');
+const app       = express();const http      = require('http');
+const server    = require('http').createServer(app);  
+const io        = require('socket.io')(server);
 
 const mongoose = require('mongoose');
 const Crop = require('./models/Crop');
@@ -117,7 +118,6 @@ app.post('/api/auth/login', express.json(), async (req, res) => {
 app.get('/api/crops', async (req, res) => {
     const crops = await Crop.find({});
     res.json(crops);
-    console.log(crops);  //want to see results for debugging
 });
 
 /************************/
@@ -199,5 +199,125 @@ app.delete('/api/crops/id/:id', requireAuth, async (req, res) => {
     }
 });
 
+/****************************/
+/******* MULTI-PLAYER *******/
+/********* FEATURES *********/
+/****************************/
+
+const rooms = {};
+
+function generateRoomCode() {
+    let res = Math.random().toString(36).substring(2, 6).toUpperCase()
+    while (rooms[res]) {
+        res = Math.random().toString(36).substring(2, 6).toUpperCase()
+    }
+    return res;
+}
+
+function startRound(code) {
+    const room = rooms[code];
+    let timeLeft = 10;
+
+    room.timer = setInterval(() => {
+        io.to(code).emit("timerUpdate", timeLeft);
+
+        timeLeft--;
+
+        if (timeLeft < 0) {
+        clearInterval(room.timer);
+        endRound(code);
+        }
+    }, 1000);
+}
+
+function endRound(code) {
+    const room = rooms[code];
+
+    // Freeze guesses
+    const finalGuesses = room.players.map(p => ({
+        name: p.name,
+        guess: p.guess
+    }));
+
+    io.to(code).emit("roundEnded", finalGuesses);
+
+    // Reset guesses
+    room.players.forEach(p => p.guess = "");
+}
+
+//socket.io stuff
+//https://socket.io/docs/v3/emit-cheatsheet/
+io.on('connection', (socket) => {
+    console.log(socket.id + ' connected');
+
+    socket.on("disconnect", () => {
+        for (const code in rooms) {
+            const room = rooms[code];
+
+            delete room.players[socket.id];
+
+            if (room.players.length === 0) {
+                delete rooms[code];
+            } else {
+                io.to(code).emit("updatePlayers", room.players);
+            }
+        }
+    });
+
+    socket.on('createRoom', (username) => {
+        const roomCode = generateRoomCode();
+        rooms[roomCode] = {
+            host: socket.id,
+            players: { [socket.id]: { username: username, guess: "", score: 0 } },
+            gameState: "lobby",
+            timer: null,
+            currentCrop: null            
+        };
+        
+        socket.join(roomCode);
+        socket.emit('roomCreated', roomCode);
+        console.log('Room ' + roomCode + ' created by ' + username + ' (' + socket.id + ')');
+    });
+
+    socket.on('joinRoom', ({ roomCode }) => {
+        const room = rooms[roomCode];
+        if (!room) {
+            socket.emit("errorMessage", "Room not found");
+            return;
+        }
+
+        if (Object.keys(room.players).length >= 9) {
+            socket.emit("errorMessage", "Room full");
+            return;
+        }
+
+        room.players[socket.id] = { id: socket.id, username: "", guess: "", score: 0 };
+        socket.join(roomCode);
+        io.to(roomCode).emit('playerJoined', Object.values(room.players));
+        console.log('Player ' + socket.id + ' joined room ' + roomCode);
+    });
+
+    socket.on("startGame", (code) => {
+        const room = rooms[code];
+        
+        if (socket.id !== room.host) return;
+
+        room.gameState = "playing";
+        io.to(code).emit("gameStarted");
+    });
+
+    socket.on("updateGuess", ({ code, guess }) => {
+        const room = rooms[code];
+        const player = room.players.find(p => p.id === socket.id);
+
+        if (player) {
+            player.guess = guess;
+            io.to(code).emit("updatePlayers", room.players);
+        }
+    });
+
+
+});
+
 //starts server
-app.listen(PORT, () => { console.log("Server started on port: " + PORT) });
+server.listen(PORT, () => { console.log("Server started on port: " + PORT) });

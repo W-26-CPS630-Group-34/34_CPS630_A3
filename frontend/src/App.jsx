@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import "./css/App.css";
 import Home from "./components/Home";
-import Game from "./components/Game";
+import SinglePlayer from "./components/SinglePlayer";
 import Admin from "./components/Admin";
 
 function App() {
@@ -13,13 +13,14 @@ function App() {
 
         <nav>
           <Link to="/">Home</Link>
-          <Link to="/game">Play Game</Link>
+          <Link to="/solo">Single Player</Link>
+          {/* Add routes to create and join multiplayer games here */}
           <Link to="/admin">Admin</Link>
         </nav>
 
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/game" element={<Game />} />
+          <Route path="/solo" element={<SinglePlayer />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>

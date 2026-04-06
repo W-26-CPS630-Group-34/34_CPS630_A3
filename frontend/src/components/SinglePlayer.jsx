@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function Game() {
+function SinglePlayer() {
   const [levels, setLevels] = useState([]);
   const [current, setCurrent] = useState(null);
   const [index, setIndex] = useState(0);
@@ -68,4 +68,4 @@ function Game() {
   );
 }
 
-export default Game;
+export default SinglePlayer;
