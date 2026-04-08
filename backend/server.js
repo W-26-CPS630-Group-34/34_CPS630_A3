@@ -1,6 +1,7 @@
 const express   = require('express');
 const cors      = require('cors');
-const app       = express();const http      = require('http');
+const app       = express();
+const http      = require('http');
 const server    = require('http').createServer(app);  
 const io        = require('socket.io')(server);
 
@@ -254,12 +255,14 @@ io.on('connection', (socket) => {
         for (const code in rooms) {
             const room = rooms[code];
 
-            delete room.players[socket.id];
+            if (room.players[socket.id]) {
+                delete room.players[socket.id];
 
-            if (room.players.length === 0) {
-                delete rooms[code];
-            } else {
-                io.to(code).emit("updatePlayers", room.players);
+                if (Object.keys(room.players).length === 0) {
+                    delete rooms[code];
+                } else {
+                    io.to(code).emit("updatePlayers", Object.values(room.players));
+                }
             }
         }
     });
@@ -268,7 +271,7 @@ io.on('connection', (socket) => {
         const roomCode = generateRoomCode();
         rooms[roomCode] = {
             host: socket.id,
-            players: { [socket.id]: { username: username, guess: "", score: 0 } },
+            players: { [socket.id]: { id: socket.id, username: username, guess: "", score: 0 } },
             gameState: "lobby",
             timer: null,
             currentCrop: null            
@@ -276,10 +279,11 @@ io.on('connection', (socket) => {
         
         socket.join(roomCode);
         socket.emit('roomCreated', roomCode);
+        io.to(roomCode).emit('playerJoined', Object.values(rooms[roomCode].players));
         console.log('Room ' + roomCode + ' created by ' + username + ' (' + socket.id + ')');
     });
 
-    socket.on('joinRoom', ({ roomCode }) => {
+    socket.on('joinRoom', (roomCode, username) => {
         const room = rooms[roomCode];
         if (!room) {
             socket.emit("errorMessage", "Room not found");
@@ -291,7 +295,7 @@ io.on('connection', (socket) => {
             return;
         }
 
-        room.players[socket.id] = { id: socket.id, username: "", guess: "", score: 0 };
+        room.players[socket.id] = { id: socket.id, username: username, guess: "", score: 0 };
         socket.join(roomCode);
         io.to(roomCode).emit('playerJoined', Object.values(room.players));
         console.log('Player ' + socket.id + ' joined room ' + roomCode);
@@ -306,7 +310,7 @@ io.on('connection', (socket) => {
         io.to(code).emit("gameStarted");
     });
 
-    socket.on("updateGuess", ({ code, guess }) => {
+    socket.on("updateGuess", (code, guess) => {
         const room = rooms[code];
         const player = room.players.find(p => p.id === socket.id);
 
