@@ -138,7 +138,6 @@ app.post('/api/auth/register', express.json(), async (req, res) => {
     });
 
     await newUser.save();
-
     res.status(201).json({
         message: 'Account created',
         token
