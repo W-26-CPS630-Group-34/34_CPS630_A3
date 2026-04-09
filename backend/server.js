@@ -92,7 +92,12 @@ async function requireAuth(req, res, next) {
 /******* SERVER *********/
 /******* AUTH ***********/
 /************************/
-//!! Class 1: simple login route that returns a static demo token
+app.get('/api/auth/exists', async (req, res) => {
+    const user = await User.findOne({});
+    res.json({ exists: !!user });
+});
+
+//login route
 app.post('/api/auth/login', express.json(), async (req, res) => {
     const { username, password } = req.body || {};
 
@@ -100,15 +105,44 @@ app.post('/api/auth/login', express.json(), async (req, res) => {
         return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    const user = await User.findOne({ username: username, password: password });
-    if (user) {
-        return res.status(200).json({
-            message: 'Login successful',
-            token: user.token
-        });
+    const user = await User.findOne({ username, password });
+
+    if (!user) {
+        return res.status(401).json({ error: 'Invalid username or password' });
     }
 
-    return res.status(401).json({ error: 'Invalid username or password' });
+    res.json({
+        message: 'Successfully logged in',
+        token: user.token
+    });
+});
+app.post('/api/auth/register', express.json(), async (req, res) => {
+    const { username, password } = req.body || {};
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password required' });
+    }
+
+    // check if username already exists
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+        return res.status(400).json({ error: 'Username already exists' });
+    }
+
+    const token = Math.random().toString(36).substring(2);
+
+    const newUser = new User({
+        username,
+        password,
+        token
+    });
+
+    await newUser.save();
+
+    res.status(201).json({
+        message: 'Account created',
+        token
+    });
 });
 
 /************************/
