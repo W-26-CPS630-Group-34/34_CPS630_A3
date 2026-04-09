@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Lobby from "./Lobby";
+import io from "socket.io-client";
 
 const SOCKET_SERVER_URL = "http://localhost:8080";
 
@@ -87,6 +88,7 @@ function MultiPlayer() {
 
     return (
         <>
+            <br></br>
             {gameState === "home" && (
                 <form>
                     <input
@@ -98,6 +100,13 @@ function MultiPlayer() {
                     <button onClick={createRoom} type="button">
                         Create Room
                     </button>
+                    <br></br>
+                    <input
+                        type="text"
+                        placeholder="Enter a Fun Screen Name"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                    />
                     <input
                         type="text"
                         placeholder="Enter Room Code"

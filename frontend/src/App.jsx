@@ -14,8 +14,8 @@ function App() {
 
         <nav>
           <Link to="/">Home</Link>
-          <Link to="/single">Single-Player</Link>
-          <Link to="/multi">Multi-Player</Link>
+          <Link to="/single">Play Alone</Link>
+          <Link to="/multi">Play With Friends</Link>
           <Link to="/admin">Admin</Link>
         </nav>
 

@@ -298,7 +298,7 @@ io.on('connection', (socket) => {
         room.players[socket.id] = { id: socket.id, username: username, guess: "", score: 0 };
         socket.join(roomCode);
         io.to(roomCode).emit('playerJoined', Object.values(room.players));
-        console.log('Player ' + socket.id + ' joined room ' + roomCode);
+        console.log('Player ' + socket.id + ' (' + username + ') joined room ' + roomCode);
     });
 
     socket.on("startGame", (code) => {

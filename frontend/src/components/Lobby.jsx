@@ -1,4 +1,3 @@
-
 function Lobby({ roomCode, players, isHost, onStartGame }) {
     return (
         <div>
