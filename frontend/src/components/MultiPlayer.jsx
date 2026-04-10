@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Lobby from "./Lobby";
+import Game from "./Game";
 import io from "socket.io-client";
 
 const SOCKET_SERVER_URL = "http://localhost:8080";
@@ -129,10 +130,11 @@ function MultiPlayer() {
             )}
 
             {gameState === "game" && (
-                <div>
-                    <h2>Game started!</h2>
-                    <p>The game is now in progress.</p>
-                </div>
+                <Game 
+                    players={players}
+                    isHost={isHost}
+                    socket={socketRef.current}
+                />
             )}
         </>
     );

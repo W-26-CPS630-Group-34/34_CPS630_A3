@@ -31,17 +31,10 @@ db.on('open', function(e) {
 
 // change ALL OF THESE to absolute references
 crops = [
-    {id:1, src:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Chocolate_cake_%281%29.jpg/640px-Chocolate_cake_%281%29.jpg", answer:"cake", zoom:6, x:5, y:-19},
     {id:2, src:"https://upload.wikimedia.org/wikipedia/commons/4/49/Panthera_tigris_tigris.jpg", answer:"tiger", zoom:6, x:0, y:0},
     {id:3, src:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pep-Farm-Cookie-Alt.jpg/1280px-Pep-Farm-Cookie-Alt.jpg", answer:"cookie", zoom:5, x:0, y:0},
-    {id:4, src:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Safeway_cupcake_-_October_2024_-_Sarah_Stierch.jpg/640px-Safeway_cupcake_-_October_2024_-_Sarah_Stierch.jpg", answer:"cupcake", zoom:4, x:0, y:18},
     {id:5, src:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Elephant_-_Jardim_Zool%C3%B3gico_de_Bras%C3%ADlia_-_DSC09849.JPG/1280px-Elephant_-_Jardim_Zool%C3%B3gico_de_Bras%C3%ADlia_-_DSC09849.JPG?_=20120730232914", answer:"elephant", zoom:6, x:20, y:15},
-    {id:6, src:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/US_keyboard_on_MacBook_Pro_15-inch_2018.jpg/640px-US_keyboard_on_MacBook_Pro_15-inch_2018.jpg", answer:"keyboard", zoom:5, x:-39, y:-18},
-    {id:7, src:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Niagara_Falls_seen_from_Skylon_tower.jpg/640px-Niagara_Falls_seen_from_Skylon_tower.jpg", answer:"waterfall", zoom:4, x:10, y:5},
-    {id:8, src:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Round_Table_Pizza_-_October_2024_-_Sarah_Stierch_01.jpg/640px-Round_Table_Pizza_-_October_2024_-_Sarah_Stierch_01.jpg", answer:"pizza", zoom:6, x:0, y:0},
-    {id:9, src:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Staffordshire-bull-terrier-puppy-fawn-2166763.jpg/640px-Staffordshire-bull-terrier-puppy-fawn-2166763.jpg", answer:"puppy", zoom:5, x:0, y:0},
     {id:10, src:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Domestic_cat_2011_G02.jpg/1280px-Domestic_cat_2011_G02.jpg?_=20110112174248", answer:"cat", zoom:5, x:0, y:0},
-    {id:11, src:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Strawberry_friut_red_strawberry.jpg/640px-Strawberry_friut_red_strawberry.jpg", answer:"strawberry", zoom:5, x:0, y:0},
     {id:12, src:"https://upload.wikimedia.org/wikipedia/commons/7/72/Zebra_eating.jpg", answer:"zebra", zoom:4, x:-10, y:10},
 ]
 

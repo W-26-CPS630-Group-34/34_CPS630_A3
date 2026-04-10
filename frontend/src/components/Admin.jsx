@@ -29,7 +29,10 @@ function Admin() {
   const createLevel = async () => {
     await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${authToken}`
+      },
       body: JSON.stringify({ id, src, answer, zoom, x, y }) // sending data
     });
 
@@ -46,7 +49,10 @@ function Admin() {
   const updateLevel = async () => {
     await fetch(`${API}/id/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${authToken}`
+      },
       body: JSON.stringify({ src, answer, zoom, x, y }) // sending data (exclude id since it's in URL)
     });
 
@@ -61,7 +67,12 @@ function Admin() {
 
   // DELETE
   const deleteLevel = async (id) => {
-    await fetch(`${API}/id/${id}`, { method: "DELETE" });
+    await fetch(`${API}/id/${id}`, { 
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${authToken}`
+      } 
+    });
     fetchLevels();
   };
 
