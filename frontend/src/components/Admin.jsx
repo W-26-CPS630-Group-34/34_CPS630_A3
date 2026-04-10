@@ -118,7 +118,7 @@ function Admin() {
             onChange={(e) => setY(e.target.value)}
           />
           <br/>
-          <button onClick={createLevel}>Add</button>
+          <button onClick={createLevel}>Create</button>
           <button onClick={updateLevel}>Update</button>
           <br/><br/>
           <h3>All Levels</h3>

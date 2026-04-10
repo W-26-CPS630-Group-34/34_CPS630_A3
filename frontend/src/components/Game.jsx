@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 
-function Game({ players, isHost, socket, current, roomCode }) {
+function Game({ players, isHost, socket, current, roomCode, gameState, timer, next }) {
     const [myInput, setMyInput] = useState("");
-    
-    const [error, setError] = useState("");
-    const [message, setMessage] = useState(""); 
+     
 
     const handleChange = (value) => {
         setMyInput(value); 
@@ -12,15 +10,15 @@ function Game({ players, isHost, socket, current, roomCode }) {
     };
 
 
-    if (error) return <p>{error}</p>;
     if (!current) return <p>No crops found</p>;
 
     return (
         <div>
             <h2>Guess the Object</h2>
-            <p>Type your guess in your box below:</p>
+            <p>Type your guess in your box below!</p>
             <p>Level: {current.id}</p>
-            <p>{message}</p>
+            <p>Time Remaining: {timer} seconds</p>
+            <p>{gameState === "completed" ? `Time's up! The answer was: ${current.answer}` : ""}</p>
             
             <div className="img">
                 <img
@@ -41,10 +39,16 @@ function Game({ players, isHost, socket, current, roomCode }) {
                     <input
                     value={p.id === socket.id ? myInput : p.guess}
                     onChange={(e) => handleChange(e.target.value)}
-                    disabled={p.id !== socket.id}
+                    disabled={p.id !== socket.id || gameState == "completed"}
                     />
+
+                    <p>Score: {p.score}</p>
                 </div>
             ))}
+
+            {isHost && gameState === "completed" && (
+                <button onClick={next}>Next Round</button>
+            )}
 
         </div>
     );

@@ -8,12 +8,13 @@ const SOCKET_SERVER_URL = "http://localhost:8080";
 function MultiPlayer() {
     const socketRef = useRef(null);
     const [roomCode, setRoomCode] = useState("");
-    const [room, setRoom] = useState(null);
     const [roomCodeInput, setRoomCodeInput] = useState("");
     const [playerName, setPlayerName] = useState("");
     const [players, setPlayers] = useState([]);
     const [gameState, setGameState] = useState("home");
     const [isHost, setIsHost] = useState(false);
+    const [timer, setTimer] = useState(0);
+    const [crop, setCrop] = useState(null);
 
     useEffect(() => {
         const socket = io(SOCKET_SERVER_URL, {
@@ -26,30 +27,35 @@ function MultiPlayer() {
             console.log("Connected to socket server", socket.id);
         });
 
-        socket.on("roomCreated", (room) => {
-            setPlayers(Object.values(room.players));
-            setRoomCode(room.code);
-            setRoom(room);
-        });
-
-        socket.on("playerJoined", (players) => {
+        socket.on("playerJoined", (players, state, code) => {
             setPlayers(Object.values(players));
-            setGameState("lobby");
+            setGameState(state);
+            setRoomCode(code);
         });
 
         socket.on("updatePlayers", (players) => {
             setPlayers(Object.values(players));
         });
         
-        
 
         socket.on("errorMessage", (message) => {
             alert(message);
         });
+        
+        
+        socket.on("gameStarted", (state, crop) => {
+            setGameState(state);
+            setCrop(crop);
+        });
+        
+        
+        socket.on("timerUpdate", (time) => {
+            setTimer(time);
+        });
 
-        socket.on("gameStarted", (room) => {
-            setRoom(room);
-            setGameState("game");
+        socket.on("roundEnded", (state, players) => {
+            setGameState(state);
+            setPlayers(players);
         });
 
         return () => {
@@ -82,9 +88,8 @@ function MultiPlayer() {
             return;
         }
 
-        const code = roomCodeInput.trim().toUpperCase();
-        setRoomCode(code);
-        socketRef.current?.emit("joinRoom", code, playerName);
+        setRoomCodeInput(roomCodeInput.trim().toUpperCase());
+        socketRef.current?.emit("joinRoom", roomCodeInput, playerName);
     }
 
     function startGame() {
@@ -125,24 +130,28 @@ function MultiPlayer() {
                 </form>
             )}
 
-            {gameState === "lobby" && (
-                <Lobby
-                    roomCode={roomCode}
-                    players={players}
-                    isHost={isHost}
-                    onStartGame={startGame}
-                />
+            { gameState === "lobby" && (
+                    <Lobby
+                        roomCode={roomCode}
+                        players={players}
+                        isHost={isHost}
+                        onStartGame={startGame}
+                    />
             )}
 
-            {gameState === "game" && (
+            { (gameState === "started" || gameState === "completed" )&& (
                 <Game 
                     players={players}
                     isHost={isHost}
                     socket={socketRef.current}
-                    current={room.crops[room.index]}
+                    current={crop}
                     roomCode={roomCode}
+                    gameState={gameState}
+                    timer={timer}
+                    next = {startGame}
                 />
             )}
+            
         </>
     );
 }

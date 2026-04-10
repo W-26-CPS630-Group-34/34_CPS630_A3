@@ -251,33 +251,39 @@ function generateRoomCode() {
 
 function startRound(code) {
     const room = rooms[code];
-    let timeLeft = 10;
+    room.gameState = "started";
+    room.index = (room.index + 1) % room.crops.length;
 
+    io.to(code).emit("gameStarted", room.gameState, room.crops[room.index]);
+    let timeLeft = 20;
+    
     room.timer = setInterval(() => {
         io.to(code).emit("timerUpdate", timeLeft);
 
         timeLeft--;
 
         if (timeLeft < 0) {
-        clearInterval(room.timer);
-        endRound(code);
+            clearInterval(room.timer);
+            endRound(code);
         }
     }, 1000);
+
 }
 
 function endRound(code) {
     const room = rooms[code];
+    room.gameState = "completed";
+    const answer = room.crops[room.index].answer.toLowerCase();
+    room.timer = null;
+    
+    Object.values(room.players).forEach(p => {
+        if (p.guess.toLowerCase() === answer) {
+            p.score += 1;
+        }
+        p.guess = "";
+    });
 
-    // Freeze guesses
-    const finalGuesses = room.players.map(p => ({
-        name: p.name,
-        guess: p.guess
-    }));
-
-    io.to(code).emit("roundEnded", finalGuesses);
-
-    // Reset guesses
-    room.players.forEach(p => p.guess = "");
+    io.to(code).emit("roundEnded", room.gameState, Object.values(room.players));
 }
 
 //socket.io stuff
@@ -312,12 +318,14 @@ io.on('connection', (socket) => {
             gameState: "lobby",
             timer: null,
             crops: crops, 
-            index: 0           
+            index: -1  
         };
         
         socket.join(roomCode);
-        socket.emit('roomCreated', rooms[roomCode]);
-        io.to(roomCode).emit('playerJoined', Object.values(rooms[roomCode].players));
+        socket.emit('roomCreated', roomCode);
+
+        const room = rooms[roomCode];
+        io.to(roomCode).emit('playerJoined', Object.values(rooms[roomCode].players), room.gameState, roomCode);
         console.log('Room ' + roomCode + ' created by ' + username + ' (' + socket.id + ')');
     });
 
@@ -335,7 +343,7 @@ io.on('connection', (socket) => {
 
         room.players[socket.id] = { id: socket.id, username: username, guess: "", score: 0 };
         socket.join(roomCode);
-        io.to(roomCode).emit('playerJoined', Object.values(room.players));
+        io.to(roomCode).emit('playerJoined', Object.values(room.players), room.gameState, roomCode);
         console.log('Player ' + socket.id + ' (' + username + ') joined room ' + roomCode);
     });
 
@@ -343,9 +351,7 @@ io.on('connection', (socket) => {
         const room = rooms[code];
         
         if (socket.id !== room.host) return;
-
-        room.gameState = "playing";
-        io.to(code).emit("gameStarted", room);
+        startRound(code);
     });
 
     socket.on("updateGuess", (code, guess) => {
@@ -356,7 +362,7 @@ io.on('connection', (socket) => {
 
         if (player) {
             player.guess = guess;
-            io.to(code).emit("updatePlayers", room.players);
+            io.to(code).emit("updatePlayers", Object.values(room.players));
         }
     });
 
