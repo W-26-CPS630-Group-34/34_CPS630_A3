@@ -233,6 +233,14 @@ app.delete('/api/crops/id/:id', requireAuth, async (req, res) => {
 
 const rooms = {};
 
+// Fisher-Yates shuffle function
+const shuffle = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+};
+
 function generateRoomCode() {
     let res = Math.random().toString(36).substring(2, 6).toUpperCase()
     while (rooms[res]) {
@@ -293,18 +301,22 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('createRoom', (username) => {
+    socket.on('createRoom', async (username) => {
         const roomCode = generateRoomCode();
+        const crops = await Crop.find({});
+        shuffle(crops);
         rooms[roomCode] = {
+            code: roomCode,
             host: socket.id,
             players: { [socket.id]: { id: socket.id, username: username, guess: "", score: 0 } },
             gameState: "lobby",
             timer: null,
-            currentCrop: null            
+            crops: crops, 
+            index: 0           
         };
         
         socket.join(roomCode);
-        socket.emit('roomCreated', roomCode);
+        socket.emit('roomCreated', rooms[roomCode]);
         io.to(roomCode).emit('playerJoined', Object.values(rooms[roomCode].players));
         console.log('Room ' + roomCode + ' created by ' + username + ' (' + socket.id + ')');
     });
@@ -333,12 +345,14 @@ io.on('connection', (socket) => {
         if (socket.id !== room.host) return;
 
         room.gameState = "playing";
-        io.to(code).emit("gameStarted");
+        io.to(code).emit("gameStarted", room);
     });
 
     socket.on("updateGuess", (code, guess) => {
         const room = rooms[code];
-        const player = room.players.find(p => p.id === socket.id);
+        if (!room || !room.players) return;
+
+        const player = room.players[socket.id];
 
         if (player) {
             player.guess = guess;

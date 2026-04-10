@@ -8,6 +8,7 @@ const SOCKET_SERVER_URL = "http://localhost:8080";
 function MultiPlayer() {
     const socketRef = useRef(null);
     const [roomCode, setRoomCode] = useState("");
+    const [room, setRoom] = useState(null);
     const [roomCodeInput, setRoomCodeInput] = useState("");
     const [playerName, setPlayerName] = useState("");
     const [players, setPlayers] = useState([]);
@@ -25,26 +26,29 @@ function MultiPlayer() {
             console.log("Connected to socket server", socket.id);
         });
 
-        socket.on("roomCreated", (code) => {
-            setRoomCode(code);
-            setRoomCodeInput(code);
-            setIsHost(true);
+        socket.on("roomCreated", (room) => {
+            setPlayers(Object.values(room.players));
+            setRoomCode(room.code);
+            setRoom(room);
         });
 
         socket.on("playerJoined", (players) => {
-            setPlayers(players);
+            setPlayers(Object.values(players));
             setGameState("lobby");
         });
 
         socket.on("updatePlayers", (players) => {
-            setPlayers(players);
+            setPlayers(Object.values(players));
         });
+        
+        
 
         socket.on("errorMessage", (message) => {
             alert(message);
         });
 
-        socket.on("gameStarted", () => {
+        socket.on("gameStarted", (room) => {
+            setRoom(room);
             setGameState("game");
         });
 
@@ -62,6 +66,7 @@ function MultiPlayer() {
         }
 
         socketRef.current?.emit("createRoom", playerName);
+        setIsHost(true);
     }
 
     function joinRoom(e) {
@@ -134,6 +139,8 @@ function MultiPlayer() {
                     players={players}
                     isHost={isHost}
                     socket={socketRef.current}
+                    current={room.crops[room.index]}
+                    roomCode={roomCode}
                 />
             )}
         </>

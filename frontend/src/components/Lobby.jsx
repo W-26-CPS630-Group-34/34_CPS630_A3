@@ -1,4 +1,5 @@
 function Lobby({ roomCode, players, isHost, onStartGame }) {
+
     return (
         <div>
             <h2>Lobby</h2>
@@ -6,7 +7,7 @@ function Lobby({ roomCode, players, isHost, onStartGame }) {
             <p>Players in room: {players.length}</p>
             <ul>
                 {players.map((player) => (
-                    <li key={player.id || player.username}>
+                    <li key={player.id}>
                         {player.username}
                     </li>
                 ))}
