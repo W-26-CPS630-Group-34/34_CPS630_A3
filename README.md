@@ -2,13 +2,9 @@
 Zoomble is a web game where users attempt to guess the subject of an image based on a very zoomed in selection of it. Users can also source their own images and create their own levels. Note that answers are singular words, so as to keep answers from getting too long and convoluted.
 
 ## Extended Content (Coming Soon???)
-In the future, it would be great to add a second step to the creation page. Users have to estimate the final look of their level, but an interactive viewer that renders the image as seen in-game would solve this issue.
+Future features for this web app, beyond the scope of this project, could include a category system. Images in the bank would be organized into specific topics or subjects, allowing players to select one or multiple categories instead of drawing from a general pool. This would be similar to Trivial Pursuit, where players can avoid weaker subjects and focus on areas they find more interesting.
 
-Users can only provide externally sourced images. The schema should allow users to add their own images. This would require changes to the 
-CRUD forms too, adding a section for file upload.
-
-In transferring over the game from static HTML/CSS to React, many of the original visual elements were lost, such as animation and colour changing backgrounds. These were not added due to time constraints, it would be great to add them back in the future.
-
+At the moment, only images can be added to the game, but adding support for video files could significantly increase variety. The system could capture screenshots from videos and use them as prompts. However, implementing this would be challenging, as it may require detecting and focusing on specific objects within a video before generating a usable image. As an alternative, the game could follow a simpler approach used by movie-based guessing games, where a random frame from a film is selected and slightly zoomed in, and players must guess the movie.
 # Run Frontend
 ```
 cd frontend
@@ -29,4 +25,4 @@ App will run on localhost, port 5173
 Head to http://localhost:5173/ to experience the game!
 
 ## Reflection
-There were many difficulties with the development of the frontend. The person who originally wrote the frontend made many mistakes and created lots of bugs and errors. This caused development to grind to a halt as another individual had to come in and fix their mess. It is suspected that use of AI caused many of these errors. There were also many incorrect API calls and references to object attributes that do not exist.
+The main difficult of this assignment was still focused on the frontend. This time around the difficulty with the frontend revolved around the amount sheer work the were need to be added to the frontend made it challenaging. The backend work was much more simplier, as the main focus was the implementation of the Socket.IO for multip-player. The idea was to make a multiy-player system similar to a Quizzlet or Kahoot, where a room is created by the host and room code was assigned to join the host. Frontend wise, the page kept either crashing or dissappear when trying to add feature that helped with the Princpiples of Nielsen Usability. A specific issue that was notedable was the implemtation of a timer system. That took a significant amount of time out of this project.
