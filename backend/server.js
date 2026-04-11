@@ -86,7 +86,13 @@ async function requireAuth(req, res, next) {
 /******* AUTH ***********/
 /************************/
 app.get('/api/auth/exists', async (req, res) => {
-    const user = await User.findOne({});
+    const { username } = req.query;
+    //if an user never exists, record false; otherwise match the user on db
+    if (!username) {
+        return res.json({ exists: false });
+    }
+
+    const user = await User.findOne({ username });
     res.json({ exists: !!user });
 });
 
@@ -123,7 +129,7 @@ app.post('/api/auth/register', express.json(), async (req, res) => {
     }
 
     const token = Math.random().toString(36).substring(2);
-
+//save the new info to db
     const newUser = new User({
         username,
         password,
